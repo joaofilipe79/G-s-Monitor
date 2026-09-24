@@ -1,0 +1,23 @@
+name: Monitor de Gas Natural
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copiar o codigo
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Instalar pacotes
+      run: |
+        pip install yfinance pandas
+
+    - name: Executar Script
+      run: python analise_gas.py
