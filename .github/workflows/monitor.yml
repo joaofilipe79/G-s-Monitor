@@ -10,18 +10,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Copiar o codigo
-      uses: actions/checkout@v4
-
     - name: Configurar Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
-    - name: Instalar pacotes
+    - name: Instalar pacotes financeiros
       run: |
         python -m pip install --upgrade pip
         pip install yfinance pandas
 
-    - name: Executar Script
-      run: python analise_gas.py
+    - name: Executar Analise em Tempo Real
+      run: |
+        python -c "
+        import yfinance as yf
+        try:
+            ticker = 'NG=F'
+            dados = yf.download(ticker, period='5d', interval='1d')
+            if dados.empty or len(dados) < 2:
+                print('Aviso: Aguardando dados limpos da bolsa...')
+                exit(0)
+            
+            preco_atual = float(dados['Close'].iloc[-1])
+            preco_anterior = float(dados['Close'].iloc[-2])
+            variacao = ((preco_atual - preco_anterior) / preco_anterior) * 100
+            
+            print('\n=== RELATORIO AUTOMATICO DE MERCADO ===')
+            print(f'Preco Anterior: ${preco_anterior:.3f}/MMBtu')
+            print(f'Preco Atual:    ${preco_atual:.3f}/MMBtu')
+            print(f'Variacao:       {variacao:+.2f}%')
+            print('=======================================\n')
+            
+            if variacao >= 5.0:
+                print('🚨 ALERTA DE MOVIMENTO EXTREMO DETETADO! 🚨')
+                print(f'Conclusao: Forte subida de {variacao:.2f}%. Relatorio EIA ou Short Squeeze em curso.')
+            elif variacao <= -5.0:
+                print('📉 ALERTA DE QUEDA ACENTUADA DETETADO! 📉')
+            else:
+                print('⚖️ Mercado estavel dentro dos parametros normais.')
+        except Exception as e:
+            print(f'Erro na analise: {e}')
+        "
