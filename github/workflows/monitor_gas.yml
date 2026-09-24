@@ -1,0 +1,30 @@
+name: Monitor de Gas Natural
+
+# Define quando o código é executado
+on:
+  schedule:
+    # Corre de hora a hora (pode mudar o intervalo se quiser)
+    - cron: '0 * * * *'
+  # Permite-lhe correr o código manualmente clicando num botão para testar
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Copiar o codigo para o servidor
+      uses: actions/checkout@v3
+
+     Palazzo - name: Configurar o Python no servidor
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Instalar bibliotecas do requirements.txt
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Executar o Script de Analise
+      run: python analise_gas.py
